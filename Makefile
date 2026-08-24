@@ -6,8 +6,11 @@ NAME        = inception
 RM = rm -fr
 C_DIR := pwd
 
-COMPOSE			:= DATA_PATH=$(DATA_PATH) docker compose -f srcs/docker-compose.yml
+USER_LOG 		:= $(shell echo $${SUDO_USER:-$$(whoami)})
+DATA_PATH 		= /home/$(USER_LOG)/data
 
+COMPOSE			:= DATA_PATH=$(DATA_PATH) docker compose -f srcs/docker-compose.yml
+SERVICE_ARGS	:= ""
 
 help:
 	@echo "================================================"
@@ -15,9 +18,31 @@ help:
 	@echo "================================================"
 
 install:
-	sudo apt update && sudo apt upgrade
- 	curl -fsSL https://get.docker.com -o get-docker.sh
- 	sudo sh ./get-docker.sh --dry-run
+	sudo apt update
+	sudo apt upgrade
+	curl -fsSL https://get.docker.com -o get-docker.sh
+	sudo sh ./get-docker.sh --dry-run
+
+up:
+	$(COMPOSE) up -d --build $(SERVICE_ARGS)
+	
+start:
+	$(COMPOSE) start $(SERVICE_ARGS)
+
+stop:
+	$(COMPOSE) stop $(SERVICE_ARGS)
+
+restart:
+	$(COMPOSE) restart $(SERVICE_ARGS)
+
+down:
+	$(COMPOSE) down
+
+logs:
+	$(COMPOSE) logs -f $(SERVICE_ARGS)
+
+clean:
+	$(COMPOSE) down --rmi all --volumes
 
 info:
 	@echo "================== CONTAINERS =================="

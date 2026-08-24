@@ -1,0 +1,28 @@
+#YAML
+
+name: inception
+
+# TEMPLATES AND ANCHORS
+
+x-common-service: &common-service
+  init: true
+  restart: always
+  networks:
+    - inception-backend
+
+# SERVICES
+
+services:
+  nginx:
+    <<: *common-service
+    build: ./requirements/nginx
+    image: nginx:inception_nginx
+    container_name: nginx
+    ports:
+      - "8443:443"
+      - "8080:80"
+
+
+networks:
+  inception-backend:
+    driver: bridge
