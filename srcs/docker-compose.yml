@@ -13,16 +13,58 @@ x-common-service: &common-service
 # SERVICES
 
 services:
+  mariadb:
+    <<: *common-service
+    build: ./requirements/mariadb
+    image: mariadb:inception_mariadb
+    container_name: mariadb
+    volumes:
+      - wp_db:/var/lib/mysql    
+
+
   nginx:
     <<: *common-service
     build: ./requirements/nginx
     image: nginx:inception_nginx
     container_name: nginx
+    # prort - outside: inside
     ports:
       - "8443:443"
       - "8080:80"
 
 
+# VOLUMES
+volumes:
+  wp_db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      # If USER_LOG is not set, it defaults to 'default_user'
+      device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}:/wp_db
+  wp_files:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}:/wp_files
+
+
+# NETWORKS
 networks:
   inception-backend:
     driver: bridge
+
+# SECRETS
+secrets:
+  mariadb_root_pass:
+    file: ${MARIADB_ROOT_PASSWORD_HOST_FILE}
+  mariadb_admin_pass:
+    file: ${MARIADB_ADMIN_PASSWORD_HOST_FILE}
+  mariadb_wp_user_pass:
+    file: ${MARIADB_WP_USER_PASSWORD_HOST_FILE}
+  
+  wp_admin_pass:
+    file: ${WP_ADMIN_PASSWORD_HOST_FILE}
+  wp_user_pass:
+    file: ${WP_USER_PASSWORD_HOST_FILE}

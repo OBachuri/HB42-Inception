@@ -9,7 +9,7 @@
 ## Description
 
 This project aims to broaden your knowledge of system administration by using Docker.
-
+ 
 ### Project Architecture
 
 ![Chart - Project Architecture](inception-arch.png)
@@ -17,6 +17,12 @@ This project aims to broaden your knowledge of system administration by using Do
 
 ## Instructions
 
+## Notes
+- Even with Rootless Docker if you have access to run docker and to read files/folders - you could change or delete  this files/folders.
+```
+	DATA_PATH = path_on_host_to_delete ;
+	docker run --rm -v $(DATA_PATH):/data alpine sh -c 'rm -rf /data/*'
+```
 
 
 ## Resources

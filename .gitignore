@@ -1,3 +1,15 @@
+secrets/
+.secrets/
+*.crt
+*.key
+*.pem
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+.idea/
 .venv
 __pycache__
 .mypy_cache
@@ -6,5 +18,3 @@ __pycache__
 .pyc
 .pyo
 *.spec
-data/processed
-moulinette
