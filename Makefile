@@ -12,7 +12,7 @@ C_DIR := pwd
 USER_LOG 		:= $(shell echo $${SUDO_USER:-$$(whoami)})
 DATA_PATH 		:= /home/$(USER_LOG)/data
 
-COMPOSE			:= docker compose -f srcs/docker-compose.yml
+COMPOSE			:=  DATA_PATH=$(DATA_PATH)  docker compose -f srcs/docker-compose.yml --env-file srcs/.env
 
 VOLUMES    	:= wp_db wp_files
 
@@ -28,7 +28,7 @@ REQUIRED_FILES := \
 	srcs/.env \
 	srcs/docker-compose.yml 
 
-SERVICE_COMMANDS := up start stop restart logs
+SERVICE_COMMANDS := up start stop restart logs log
 
 ifneq ($(filter $(firstword $(MAKECMDGOALS)),$(SERVICE_COMMANDS)),)
   SERVICE_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -48,6 +48,7 @@ install:
 	sudo sh ./get-docker.sh --dry-run
 
 up:
+
 	$(COMPOSE) up -d --build $(SERVICE_ARGS)
 	
 start:
@@ -62,19 +63,25 @@ restart:
 down:
 	$(COMPOSE) down
 
+
 logs:
 	$(COMPOSE) logs -f $(SERVICE_ARGS)
+
+log: logs
 
 clean:
 	$(COMPOSE) down --rmi all --volumes
 
 fclean f: clean
 	# Even with Rootless Docker if you have access to run docker and to read files/folders - you could change or delete  this files/folders.
-	@docker run --rm -v $(DATA_PATH):/data alpine sh -c 'rm -rf /data/*'
+	@docker run --rm -v $(DATA_PATH):/data debian:bookworm-slim sh -c 'rm -rf /data/*'
 
 re: fclean all
 
 info:
+	@echo "================================================"
+	@echo "Volumes directory: $(DATA_PATH)"
+	@echo "WP database: $(MARIADB_WP_DATABASE)"
 	@echo "================== CONTAINERS =================="
 	@docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}\t{{.Ports}}"
 
@@ -100,6 +107,11 @@ info:
 
 prepare:
 	@mkdir -p "$(DATA_PATH)"
+	@chmod 777 "$(DATA_PATH)" 2>/dev/null || true;
+	@for vol in $(VOLUMES); do \
+		mkdir -p "$(DATA_PATH)/$$vol"; \
+		chmod 777 "$(DATA_PATH)/$$vol" 2>/dev/null || true; \
+	done
 	@mkdir -p "$(SECRETS_DIR)"
 	@for file in $(SECRETS); do \
 		if [ ! -f "$(SECRETS_DIR)/$$file" ]; then \

@@ -15,11 +15,24 @@ x-common-service: &common-service
 services:
   mariadb:
     <<: *common-service
-    build: ./requirements/mariadb
+    build:
+      context: ./requirements/mariadb
+      dockerfile: ./Dockerfile
+      # Grant this secret ONLY to the build context
+    secrets:
+      - mariadb_root_pass
+      - mariadb_admin_pass
+      - mariadb_wp_user_pass
+    environment:
+      - MARIADB_WP_DATABASE
+      - MARIADB_ADMIN_USER
+      - MARIADB_WP_USER
     image: mariadb:inception_mariadb
     container_name: mariadb
     volumes:
-      - wp_db:/var/lib/mysql    
+      - wp_db:/var/lib/mysql
+    security_opt:
+      - seccomp=unconfined  
 
 
   nginx:
@@ -41,13 +54,13 @@ volumes:
       type: none
       o: bind
       # If USER_LOG is not set, it defaults to 'default_user'
-      device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}:/wp_db
+      device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}/wp_db
   wp_files:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}:/wp_files
+      device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}/wp_files
 
 
 # NETWORKS

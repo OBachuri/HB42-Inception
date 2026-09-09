@@ -1,10 +1,10 @@
 FROM debian:bookworm-slim
 
-RUN apt-get -y update && apt-get -y upgrade \
+RUN apt-get -y update && apt-get -y upgrade && \
     DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
         nginx \
         openssl \
-        curl && \
+        curl  \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
