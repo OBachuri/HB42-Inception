@@ -6,9 +6,7 @@ DATADIR="/var/lib/mysql"
 DB_DIR="${DATADIR}/${MARIADB_WP_DATABASE}"
 
 mkdir -p /run/mysqld
-chown -R mysql:mysql /run/mysqld 
-
-
+chown -R mysql:mysql /run/mysqld
 
 if [ ! -d "$DATADIR/mysql" ]; then
 	# DB must be initialize ...
@@ -62,5 +60,8 @@ EOF
 	echo "Initialization MariaDB complete."
 	# sleep 1
 fi
+
+# Ensure correct permissions before starting the main process
+chown -R mysql:mysql "$DATADIR"
 
 exec "$@"
