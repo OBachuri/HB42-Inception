@@ -47,9 +47,13 @@ services:
     environment:
       - DOMAIN_NAME
       - WP_TITLE
+      - WP_DB_HOST
+      - WP_DB_NAME
       - WP_DB_USER
       - WP_ADMIN_USER
+      - WP_ADMIN_EMAIL
       - WP_USER
+      - WP_USER_EMAIL
       - WP_PHP_VERSION
       - WP_VERSION
     secrets:
@@ -67,10 +71,16 @@ services:
     image: nginx:inception_nginx
     container_name: nginx
     # prort - outside: inside
+    environment:
+      - DOMAIN_NAME
     ports:
       - "8443:443"
       - "8080:80"
-
+    volumes:
+      - wp_files:/var/www/html
+      - v_nginx_cert:/etc/nginx/ssl 
+    depends_on:
+      - wordpress
 
 # VOLUMES
 volumes:
@@ -87,7 +97,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}/wp_files
-
+  v_nginx_cert:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}/v_nginx_cert
 
 # NETWORKS
 networks:

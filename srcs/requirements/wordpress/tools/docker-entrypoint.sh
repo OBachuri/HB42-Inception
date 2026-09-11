@@ -20,14 +20,15 @@ if [ ! -f "${WP_CONFIG}" ]; then
     WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_pass)
     WP_USER=$(cat /run/secrets/wp_user_pass)
 
-	cat > "${WP_CONFIG}" <<EOF <?php
+	cat > "${WP_CONFIG}" <<EOF
+<?php
 define( 'DB_NAME', '${WP_DB_NAME}' );
 define( 'DB_USER', '${WP_DB_USER}' );
-define( 'DB_PASSWORD', '${DB_PASSWORD}' );
+define( 'DB_PASSWORD', '${WP_DB_PASSWORD}' );
 define( 'DB_HOST', '${WP_DB_HOST}' );
 define( 'DB_CHARSET', 'utf8mb4' );
 define( 'DB_COLLATE', '' );
-define( 'WP_DEBUG', false );
+/* define( 'WP_DEBUG', false ); */ 
 \$table_prefix = 'wp_';
 define( 'WP_DEBUG', false );
 if ( ! defined( 'ABSPATH' ) ) { 
@@ -39,7 +40,7 @@ EOF
 	chown www-data:www-data "${WP_CONFIG}"
 	chmod 640 "${WP_CONFIG}"
 
-	echo "wp-config.php created."
+	echo "File wp-config.php created."
 
 fi
 
@@ -86,14 +87,14 @@ if ! wp core is-installed --path="${WP_DIR}" --allow-root; then
         --skip-email \
         --allow-root
 
-    info "Creating regular WP user..."
+    echo "Creating regular WP user..."
 
-    wp_cli user create \
+    wp user create \
         "$WP_USER" \
         "$WP_USER_EMAIL" \
         --user_pass="$WP_USER_PASSWORD" \
-        --role=author
-
+        --role=author \
+		--allow-root
 fi
 
 chown -R www-data:www-data "$WP_DIR"

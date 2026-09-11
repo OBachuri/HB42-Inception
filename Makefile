@@ -14,7 +14,7 @@ DATA_PATH 		:= /home/$(USER_LOG)/data
 
 COMPOSE			:=  DATA_PATH=$(DATA_PATH)  docker compose -f srcs/docker-compose.yml --env-file srcs/.env
 
-VOLUMES    	:= wp_db wp_files
+VOLUMES    	:= wp_db wp_files v_nginx_cert
 
 SECRETS := db_root_password.txt \
            db_admin_password.txt \
@@ -28,7 +28,7 @@ REQUIRED_FILES := \
 	srcs/.env \
 	srcs/docker-compose.yml 
 
-SERVICE_COMMANDS := up start stop restart logs log
+SERVICE_COMMANDS := up start stop restart logs log console
 
 ifneq ($(filter $(firstword $(MAKECMDGOALS)),$(SERVICE_COMMANDS)),)
   SERVICE_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
@@ -47,8 +47,7 @@ install:
 	curl -fsSL https://get.docker.com -o get-docker.sh
 	sudo sh ./get-docker.sh --dry-run
 
-up:
-
+up: prepare
 	$(COMPOSE) up -d --build $(SERVICE_ARGS)
 	
 start:
@@ -61,7 +60,7 @@ restart:
 	$(COMPOSE) restart $(SERVICE_ARGS)
 
 down:
-	$(COMPOSE) down
+	@$(COMPOSE) down
 
 
 logs:
@@ -69,11 +68,13 @@ logs:
 
 log: logs
 
+console:
+	@docker exec -it $(SERVICE_ARGS) bash  
+
 clean:
-	$(COMPOSE) down --rmi all --volumes
+	@$(COMPOSE) down --rmi all --volumes
 
 fclean f: clean
-	# Even with Rootless Docker if you have access to run docker and to read files/folders - you could change or delete  this files/folders.
 	@docker run --rm -v $(DATA_PATH):/data debian:bookworm-slim sh -c 'rm -rf /data/*'
 
 re: fclean all
@@ -114,10 +115,10 @@ prepare:
 	done
 	@mkdir -p "$(SECRETS_DIR)"
 	@for file in $(SECRETS); do \
-		if [ ! -f "$(SECRETS_DIR)/$$file" ]; then \
+		if [ ! -f "$(SECRETS_DIR)/$$file" ] || [ ! -s "$(SECRETS_DIR)/$$file" ]; then \
 			openssl rand -base64 48 | tr -dc 'a-zA-Z0-9' | head -c 1 > "$(SECRETS_DIR)/$$file" ;\
 			openssl rand 256 | tr -dc 'a-zA-Z0-9!@#%^*_+'| head -c 31 >> "$(SECRETS_DIR)/$$file" ;\
-			echo "Warning: Required file not found: $(SECRETS_DIR)/$$file and was created with random value." ;\
+			echo "Warning: Required file not found or empty: $(SECRETS_DIR)/$$file and was created with random value." ;\
 		fi; \
 	done
 
@@ -137,6 +138,4 @@ check:
 
 	@echo "All required files are present."
 
-
-
-.PHONY: install run debug clean fclean help info prepare check
+.PHONY: install run debug clean fclean help info prepare check console
