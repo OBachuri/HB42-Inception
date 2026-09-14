@@ -18,12 +18,18 @@ This project aims to broaden your knowledge of system administration by using Do
 ## Instructions
 
 ## Notes
-- Even with Rootless Docker if you have access to run docker and to read files/folders - you could change or delete  this files/folders.
+- If you have access to run docker and to read files/folders - you could change or delete this files/folders. Rootless Docker solves this problem, but not completely.
 ```
 	DATA_PATH = path_on_host_to_delete ;
 	docker run --rm -v $(DATA_PATH):/data alpine sh -c 'rm -rf /data/*'
 ```
 
+
+## Usage
+
+Once the stack is running, the following endpoints are available:
+- https://obachuri.42.fr — main WordPress admin
+- https://obachuri.42.fr/wp-admin
 
 ## Resources
 - [Docker documentation](https://docs.docker.com/)
@@ -37,7 +43,7 @@ This project aims to broaden your knowledge of system administration by using Do
 - [Start Bootstrap](https://startbootstrap.com/)
 
 ### AI Usage
-Tools Used: ChatGPT (GPT-4)
+Tools Used: ChatGPT (GPT-5)
 
 AI was used to conceptual understanding and to structuring this README to meet subject requirements.
 

@@ -74,8 +74,8 @@ services:
     environment:
       - DOMAIN_NAME
     ports:
-      - "8443:443"
-      - "8080:80"
+      - "443:443"
+    #  - "8080:80"
     volumes:
       - wp_files:/var/www/html
       - v_nginx_cert:/etc/nginx/ssl 

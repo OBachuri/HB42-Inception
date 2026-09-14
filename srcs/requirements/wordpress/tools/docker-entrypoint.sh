@@ -15,6 +15,7 @@ if [ ! -f "${WP_CONFIG}" ]; then
 	: "${WP_DB_NAME:?Error: Variable WP_DB_NAME is required}" 
 	: "${WP_DB_USER:?Error: Variable WP_DB_USER is required}" 
 	: "${WP_DB_HOST:?Error: Variable WP_DB_HOST is required}"
+	: "${DOMAIN_NAME:?Error: Variable DOMAIN_NAME is required}"
 
     WP_DB_PASSWORD=$(cat /run/secrets/mariadb_wp_user_pass)
     WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_pass)
@@ -26,6 +27,12 @@ define( 'DB_NAME', '${WP_DB_NAME}' );
 define( 'DB_USER', '${WP_DB_USER}' );
 define( 'DB_PASSWORD', '${WP_DB_PASSWORD}' );
 define( 'DB_HOST', '${WP_DB_HOST}' );
+
+/*
+define( 'WP_SITEURL', 'https://${DOMAIN_NAME}:4443'); 
+define( 'WP_HOME', 'https://${DOMAIN_NAME}:4443'); 
+*/
+
 define( 'DB_CHARSET', 'utf8mb4' );
 define( 'DB_COLLATE', '' );
 /* define( 'WP_DEBUG', false ); */ 
@@ -95,8 +102,14 @@ if ! wp core is-installed --path="${WP_DIR}" --allow-root; then
         --user_pass="$WP_USER_PASSWORD" \
         --role=author \
 		--allow-root
-fi
 
+	# wp option update home "https://${DOMAIN_NAME}:4443" --allow-root
+	# wp option update siteurl "https://${DOMAIN_NAME}:4443" --allow-root
+	
+	echo "<?php phpinfo();" > $WP_DIR/testphp.php
+	
+fi
+	
 chown -R www-data:www-data "$WP_DIR"
 
 echo "Starting PHP-FPM..."

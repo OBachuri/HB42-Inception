@@ -23,8 +23,8 @@ if [ ! -f "$CERT_DIR/nginx.key" ] || \
 		-newkey rsa:2048 \
 		-keyout $CERT_DIR/nginx.key \
 		-out $CERT_DIR/nginx.crt \
-		-subj "/C=DE/ST=Baden-Wuerttemberg/L=Heilbronn/O=42/OU=Inception/CN=CN=${DOMAIN_NAME}" \
-		-addext "subjectAltName=DNS:${DOMAIN_NAME},DNS:me.${DOMAIN_NAME}"; \
+		-subj "/C=DE/ST=Baden-Wuerttemberg/L=Heilbronn/O=42/OU=Inception/CN=${DOMAIN_NAME}" \
+		-addext "subjectAltName=DNS:${DOMAIN_NAME},DNS:*.${DOMAIN_NAME}"; \
 
     chmod 600 "$CERT_DIR/nginx.key"
 
