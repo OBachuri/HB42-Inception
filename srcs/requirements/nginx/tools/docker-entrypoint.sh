@@ -6,6 +6,9 @@ CERT_DIR="/etc/nginx/ssl"
 
 mkdir -p "$CERT_DIR"
 
+: "${NGINX_PORT:?Error: Variable NGINX_PORT is required}"
+: "${DOMAIN_NAME:?Error: Variable DOMAIN_NAME is required}"
+
 if [ ! -f "$CERT_DIR/nginx.key" ] || \
    [ ! -f "$CERT_DIR/nginx.crt" ] || \
    ! openssl x509 \
@@ -30,5 +33,9 @@ if [ ! -f "$CERT_DIR/nginx.key" ] || \
 
     echo "Certificate generated."
 fi
+
+envsubst '${NGINX_PORT} ${DOMAIN_NAME}' \
+    < /etc/nginx/sites-available/nginx.template \
+    > /etc/nginx/sites-available/default
 
 exec "$@"

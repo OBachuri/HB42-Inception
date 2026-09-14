@@ -16,8 +16,8 @@ server {
 
 
 	# SSL configuration
-	listen 443 ssl default_server;
-	listen [::]:443 ssl default_server;
+	listen ${NGINX_PORT} ssl default_server;
+	listen [::]:${NGINX_PORT} ssl default_server;
 
 	ssl_certificate     /etc/nginx/ssl/nginx.crt;
 	ssl_certificate_key /etc/nginx/ssl/nginx.key;
@@ -28,7 +28,7 @@ server {
 	# Add index.php to the list if you are using PHP
     index index.php index.html;
 
-	server_name _;
+	server_name ${DOMAIN_NAME};
 
  	client_max_body_size 256M;
 
@@ -42,6 +42,8 @@ server {
 		fastcgi_param HTTPS on;
 		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
 		include fastcgi_params;
+		fastcgi_param SERVER_PORT ${NGINX_PORT};
+		fastcgi_param HTTP_HOST ${DOMAIN_NAME}:${NGINX_PORT};
 	}
 
     location = /robots.txt {

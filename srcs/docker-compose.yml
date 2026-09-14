@@ -46,6 +46,7 @@ services:
     container_name: wordpress
     environment:
       - DOMAIN_NAME
+      - NGINX_PORT
       - WP_TITLE
       - WP_DB_HOST
       - WP_DB_NAME
@@ -73,8 +74,9 @@ services:
     # prort - outside: inside
     environment:
       - DOMAIN_NAME
+      - NGINX_PORT
     ports:
-      - "443:443"
+      - "${NGINX_PORT}:${NGINX_PORT}"
     #  - "8080:80"
     volumes:
       - wp_files:/var/www/html

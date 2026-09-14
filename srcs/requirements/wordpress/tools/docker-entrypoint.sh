@@ -16,6 +16,7 @@ if [ ! -f "${WP_CONFIG}" ]; then
 	: "${WP_DB_USER:?Error: Variable WP_DB_USER is required}" 
 	: "${WP_DB_HOST:?Error: Variable WP_DB_HOST is required}"
 	: "${DOMAIN_NAME:?Error: Variable DOMAIN_NAME is required}"
+	: "${NGINX_PORT:?Error: Variable NGINX_PORT is required}"	
 
     WP_DB_PASSWORD=$(cat /run/secrets/mariadb_wp_user_pass)
     WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_pass)
@@ -28,9 +29,9 @@ define( 'DB_USER', '${WP_DB_USER}' );
 define( 'DB_PASSWORD', '${WP_DB_PASSWORD}' );
 define( 'DB_HOST', '${WP_DB_HOST}' );
 
-/*
-define( 'WP_SITEURL', 'https://${DOMAIN_NAME}:4443'); 
-define( 'WP_HOME', 'https://${DOMAIN_NAME}:4443'); 
+/* -- 
+define( 'WP_SITEURL', 'https://${DOMAIN_NAME}:${NGINX_PORT}'); 
+define( 'WP_HOME', 'https://${DOMAIN_NAME}:${NGINX_PORT}'); 
 */
 
 define( 'DB_CHARSET', 'utf8mb4' );
@@ -62,6 +63,7 @@ if ! wp core is-installed --path="${WP_DIR}" --allow-root; then
 	: "${WP_ADMIN_EMAIL:?Error: Variable WP_ADMIN_EMAIL is required}"
 	: "${WP_USER:?Error: Variable WP_USER is required}"
 	: "${WP_USER_EMAIL:?Error: Variable WP_USER_EMAIL is required}"
+	: "${NGINX_PORT:?Error: Variable NGINX_PORT is required}"
 
     WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_pass)
     WP_USER_PASSWORD=$(cat /run/secrets/wp_user_pass)
@@ -103,9 +105,12 @@ if ! wp core is-installed --path="${WP_DIR}" --allow-root; then
         --role=author \
 		--allow-root
 
-	# wp option update home "https://${DOMAIN_NAME}:4443" --allow-root
-	# wp option update siteurl "https://${DOMAIN_NAME}:4443" --allow-root
-	
+	if [ "${NGINX_PORT}" != "443" ]; then
+		echo "Using external HTTPS port ${NGINX_PORT}"
+		wp option update home "https://${DOMAIN_NAME}:${NGINX_PORT}" --allow-root
+		wp option update siteurl "https://${DOMAIN_NAME}:${NGINX_PORT}" --allow-root
+	fi	
+
 	echo "<?php phpinfo();" > $WP_DIR/testphp.php
 	
 fi
