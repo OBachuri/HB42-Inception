@@ -8,17 +8,28 @@ WP_CONFIG="${WP_DIR}/wp-config.php"
 # Navigate to web root
 cd ${WP_DIR}
 
+: "${WP_DB_NAME:?Error: Variable WP_DB_NAME is required}" 
+: "${WP_DB_USER:?Error: Variable WP_DB_USER is required}" 
+: "${WP_DB_HOST:?Error: Variable WP_DB_HOST is required}"
+WP_DB_PASSWORD=$(cat /run/secrets/mariadb_wp_user_pass)
+
+until mysql  -h "${WP_DB_HOST%%:*}" -P "${WP_DB_HOST##*:}" -u"$WP_DB_USER" -p"$WP_DB_PASSWORD" -D"$WP_DB_NAME" -e "SELECT 1;" > /var/null 2>&1
+do
+    echo "Waiting for MariaDB..."
+    sleep 1
+done
+
+
 if [ ! -f "${WP_CONFIG}" ]; then 
 
 	echo "Creating ${WP_CONFIG}..."
 
-	: "${WP_DB_NAME:?Error: Variable WP_DB_NAME is required}" 
-	: "${WP_DB_USER:?Error: Variable WP_DB_USER is required}" 
-	: "${WP_DB_HOST:?Error: Variable WP_DB_HOST is required}"
 	: "${DOMAIN_NAME:?Error: Variable DOMAIN_NAME is required}"
-	: "${NGINX_PORT:?Error: Variable NGINX_PORT is required}"	
+	: "${NGINX_PORT:?Error: Variable NGINX_PORT is required}"
 
-    WP_DB_PASSWORD=$(cat /run/secrets/mariadb_wp_user_pass)
+	: "${WP_REDIS_HOST:?Error: Variable WP_REDIS_HOST is required for creating WP config!}"
+	: "${WP_REDIS_PORT:?Error: Variable WP_REDIS_PORT is required}"
+
     WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_pass)
     WP_USER=$(cat /run/secrets/wp_user_pass)
 
@@ -33,6 +44,11 @@ define( 'DB_HOST', '${WP_DB_HOST}' );
 define( 'WP_SITEURL', 'https://${DOMAIN_NAME}:${NGINX_PORT}'); 
 define( 'WP_HOME', 'https://${DOMAIN_NAME}:${NGINX_PORT}'); 
 */
+
+/* -- bonus - redis conections parameters */
+define('WP_REDIS_HOST', '${WP_REDIS_HOST}');
+define('WP_REDIS_PORT', ${WP_REDIS_PORT});
+
 
 define( 'DB_CHARSET', 'utf8mb4' );
 define( 'DB_COLLATE', '' );
@@ -64,6 +80,10 @@ if ! wp core is-installed --path="${WP_DIR}" --allow-root; then
 	: "${WP_USER:?Error: Variable WP_USER is required}"
 	: "${WP_USER_EMAIL:?Error: Variable WP_USER_EMAIL is required}"
 	: "${NGINX_PORT:?Error: Variable NGINX_PORT is required}"
+
+	: "${WP_REDIS_HOST:?Error: Variable WP_REDIS_HOST is required}"
+	: "${WP_REDIS_PORT:?Error: Variable WP_REDIS_PORT is required}"
+
 
     WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_pass)
     WP_USER_PASSWORD=$(cat /run/secrets/wp_user_pass)
@@ -111,7 +131,15 @@ if ! wp core is-installed --path="${WP_DIR}" --allow-root; then
 		wp option update siteurl "https://${DOMAIN_NAME}:${NGINX_PORT}" --allow-root
 	fi	
 
-	echo "<?php phpinfo();" > $WP_DIR/testphp.php
+    echo "Configuring Redis..."
+
+    # wp config set WP_REDIS_HOST "$WP_REDIS_HOST" --allow-root
+    # wp config set WP_REDIS_PORT "$WP_REDIS_PORT" --raw --allow-root
+
+    wp plugin install redis-cache --activate --allow-root
+    wp redis enable --allow-root
+
+	# echo "<?php phpinfo();" > $WP_DIR/testphp.php
 	
 fi
 	

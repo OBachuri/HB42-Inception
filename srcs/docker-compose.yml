@@ -57,6 +57,8 @@ services:
       - WP_USER_EMAIL
       - WP_PHP_VERSION
       - WP_VERSION
+      - WP_REDIS_HOST
+      - WP_REDIS_PORT
     secrets:
       - mariadb_wp_user_pass
       - wp_admin_pass
@@ -65,6 +67,7 @@ services:
       - wp_files:/var/www/html
     depends_on:
       - mariadb
+      - redis
 
   nginx:
     <<: *common-service
@@ -78,11 +81,58 @@ services:
     ports:
       - "${NGINX_PORT}:${NGINX_PORT}"
     #  - "8080:80"
+    #  -  "4443:443"
     volumes:
       - wp_files:/var/www/html
       - v_nginx_cert:/etc/nginx/ssl 
     depends_on:
       - wordpress
+
+  # -- bonus - vsftpd
+  ftp:
+    <<: *common-service
+    build: ./requirements/ftp
+    image: nginx:inception_ftp
+    container_name: ftp
+    environment:
+      - DOMAIN_NAME
+      - FTP_USER
+    ports:
+      - "1121:21"
+      # - "1120:20"
+      # - "20:20"
+      # - "21:21"
+      - "21000-21010:21000-21010"
+    secrets:
+      - ftp_user_pass
+    volumes:
+      - wp_files:/var/www/html
+    depends_on:
+      - wordpress
+
+  redis:
+    <<: *common-service
+    build: ./requirements/redis
+    image: redis:inception_redis
+    container_name: redis
+    volumes:
+      - v_redis:/data
+  
+  adminer:
+    <<: *common-service
+    build:
+      context: ./requirements/adminer
+      dockerfile: ./Dockerfile
+      args:
+        - A_PHP_VERSION
+        - ADMINER_VERSION
+    image: adminer:inception_adminer
+    container_name: adminer
+    environment:
+      - A_PHP_VERSION
+    ports:
+      - "8080:8080"
+
 
 # VOLUMES
 volumes:
@@ -105,6 +155,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}/v_nginx_cert
+  v_redis:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}/v_redis
 
 # NETWORKS
 networks:
@@ -124,3 +180,6 @@ secrets:
     file: ${WP_ADMIN_PASSWORD_HOST_FILE}
   wp_user_pass:
     file: ${WP_USER_PASSWORD_HOST_FILE}
+
+  ftp_user_pass:
+    file: ${FTP_USER_PASSWORD_HOST_FILE}

@@ -14,13 +14,14 @@ DATA_PATH 		:= /home/$(USER_LOG)/data
 
 COMPOSE			:=  DATA_PATH=$(DATA_PATH)  docker compose -f srcs/docker-compose.yml --env-file srcs/.env
 
-VOLUMES    	:= wp_db wp_files v_nginx_cert
+VOLUMES    	:= wp_db wp_files v_nginx_cert v_redis
 
 SECRETS := db_root_password.txt \
            db_admin_password.txt \
            db_wp_user_password.txt \
            wp_admin_password.txt \
-           wp_user_password.txt
+           wp_user_password.txt \
+		   ftp_user_password.txt
 
 SECRETS_DIR := secrets
 
@@ -105,6 +106,7 @@ info:
 	@echo ""
 	@echo "==================== PROJECT ==================="
 	@$(COMPOSE) ps -a
+	@echo "================================================"
 
 prepare:
 	@mkdir -p "$(DATA_PATH)"

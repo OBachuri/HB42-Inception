@@ -42,6 +42,8 @@ Once the stack is running, the following endpoints are available:
 - [OpenSSL documentation](https://www.openssl.org/docs/)
 - [Start Bootstrap](https://startbootstrap.com/)
 
+Prometheus ?
+
 ### AI Usage
 Tools Used: ChatGPT (GPT-5)
 
