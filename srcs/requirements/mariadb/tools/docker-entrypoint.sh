@@ -18,14 +18,18 @@ if [ ! -d "$DATADIR/mysql" ]; then
     ROOT_PASSWORD=$(cat /run/secrets/mariadb_root_pass)
     ADMIN_PASSWORD=$(cat /run/secrets/mariadb_admin_pass)
     WP_PASSWORD=$(cat /run/secrets/mariadb_wp_user_pass)
+	MARIADB_EXPLORER_PASSWORD=$(cat /run/secrets/mariadb_exporter_pass) 
 	
 	: "${MARIADB_WP_DATABASE:?Error: MARIADB_WP_DATABASE environment variable is required.}"
 	: "${MARIADB_ADMIN_USER:?Error: MARIADB_ADMIN_USER environment variable is required.}"
 	: "${MARIADB_WP_USER:?Error: MARIADB_WP_USER environment variable is required.}"
 
-	: "${ROOT_PASSWORD:?Error: MYSQL_ROOT_PASSWORD environment variable is required.}"
-	: "${ADMIN_PASSWORD:?Error: MYSQL_ADMIN_PASSWORD environment variable is required.}"
+	: "${ROOT_PASSWORD:?Error: ROOT_PASSWORD environment variable is required.}"
+	: "${ADMIN_PASSWORD:?Error: ADMIN_PASSWORD environment variable is required.}"
 	: "${WP_PASSWORD:?Error: WP_PASSWORD environment variable is required.}"
+
+	: "${MARIADB_EXPLORER_PASSWORD:?Error: MARIADB_EXPLORER_PASSWORD environment variable is required.}"
+
 	
 	# don't work for me 
 	# mysql_install_db --user=mysql --datadir=$DATADIR --init-file=/dev/stdin<<EOF my_sql_code EOF 	
@@ -41,7 +45,7 @@ if [ ! -d "$DATADIR/mysql" ]; then
 FLUSH PRIVILEGES; 
 -- set password for root
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${ROOT_PASSWORD}';
-
+	
 -- create admin user
 CREATE USER IF NOT EXISTS '${MARIADB_ADMIN_USER}'@'%'
 IDENTIFIED BY '${ADMIN_PASSWORD}';
@@ -53,6 +57,10 @@ GRANT ALL PRIVILEGES ON *.* TO '${MARIADB_ADMIN_USER}'@'%' WITH GRANT OPTION;
 CREATE DATABASE IF NOT EXISTS \`${MARIADB_WP_DATABASE}\`;
 CREATE USER IF NOT EXISTS '${MARIADB_WP_USER}'@'%' IDENTIFIED BY '${WP_PASSWORD}';
 GRANT ALL PRIVILEGES ON \`${MARIADB_WP_DATABASE}\`.* TO '${MARIADB_WP_USER}'@'%';
+
+CREATE USER 'prometheus'@'%' IDENTIFIED BY '${MARIADB_EXPLORER_PASSWORD}';
+
+GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'prometheus'@'%';
 
 FLUSH PRIVILEGES;
 EOF

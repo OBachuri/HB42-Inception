@@ -22,6 +22,7 @@ services:
       - mariadb_root_pass
       - mariadb_admin_pass
       - mariadb_wp_user_pass
+      - mariadb_exporter_pass
     environment:
       - MARIADB_WP_DATABASE
       - MARIADB_ADMIN_USER
@@ -133,6 +134,58 @@ services:
     ports:
       - "8080:8080"
 
+  # monitoring
+  # mariadb-exporter:
+  #   <<: *common-service
+  #   build:
+  #     context: ./requirements/mariadb-exporter
+  #     dockerfile: ./Dockerfile
+  #   image: mariadb-exporter:inception_mdb_explorer
+  #   container_name: mariadb-exporter
+  #   secrets:
+  #     - mariadb_exporter_pass
+  #   depends_on:
+  #     - mariadb
+
+  mariadb-exporter:
+    <<: *common-service
+    image: prom/mysqld-exporter:v0.20.0
+    container_name: mariadb-exporter
+    secrets:
+      - mariadb_exporter_pass
+    entrypoint:
+      - /bin/sh
+      - -c
+    command:
+      - |
+        cat > /tmp/.my.cnf <<EOF
+        [client]
+        user=prometheus
+        password=$$(cat /run/secrets/mariadb_exporter_pass)
+        EOF
+
+        chmod 600 /tmp/.my.cnf
+
+        exec /bin/mysqld_exporter \
+          --config.my-cnf=/tmp/.my.cnf \
+          --mysqld.address=mariadb:3306 \
+          --web.listen-address=0.0.0.0:9104 \
+          --no-collect.slave_status
+    depends_on:
+      - mariadb
+
+  prometheus:
+    <<: *common-service
+    build:
+      context: ./requirements/prometheus
+      dockerfile: ./Dockerfile
+    volumes:
+      - v_prometheus_tsd:/var/lib/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - mariadb-exporter
+
 
 # VOLUMES
 volumes:
@@ -161,6 +214,12 @@ volumes:
       type: none
       o: bind
       device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}/v_redis
+  v_prometheus_tsd:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-/home/${USER_LOG:-default_user}/data}/v_prometheus_tsd
 
 # NETWORKS
 networks:
@@ -183,3 +242,6 @@ secrets:
 
   ftp_user_pass:
     file: ${FTP_USER_PASSWORD_HOST_FILE}
+
+  mariadb_exporter_pass:
+    file: ${MARIADB_EXPLORER_HOST_FILE}

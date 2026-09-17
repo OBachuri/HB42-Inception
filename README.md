@@ -41,8 +41,8 @@ Once the stack is running, the following endpoints are available:
 - [Redis documentation](https://redis.io/docs/)
 - [OpenSSL documentation](https://www.openssl.org/docs/)
 - [Start Bootstrap](https://startbootstrap.com/)
+- [Prometheus - monitoring](https://prometheus.io/docs/instrumenting/exporters/)
 
-Prometheus ?
 
 ### AI Usage
 Tools Used: ChatGPT (GPT-5)

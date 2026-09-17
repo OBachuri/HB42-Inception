@@ -14,14 +14,15 @@ DATA_PATH 		:= /home/$(USER_LOG)/data
 
 COMPOSE			:=  DATA_PATH=$(DATA_PATH)  docker compose -f srcs/docker-compose.yml --env-file srcs/.env
 
-VOLUMES    	:= wp_db wp_files v_nginx_cert v_redis
+VOLUMES    	:= wp_db wp_files v_nginx_cert v_redis v_prometheus_tsd
 
 SECRETS := db_root_password.txt \
            db_admin_password.txt \
            db_wp_user_password.txt \
            wp_admin_password.txt \
            wp_user_password.txt \
-		   ftp_user_password.txt
+		   ftp_user_password.txt \
+		   mariadb_exporter_password.txt
 
 SECRETS_DIR := secrets
 
@@ -78,7 +79,7 @@ clean:
 fclean f: clean
 	@docker run --rm -v $(DATA_PATH):/data debian:bookworm-slim sh -c 'rm -rf /data/*'
 
-re: fclean all
+re: fclean up
 
 info:
 	@echo "================================================"
@@ -140,4 +141,4 @@ check:
 
 	@echo "All required files are present."
 
-.PHONY: install run debug clean fclean help info prepare check console
+.PHONY: install run debug clean fclean help info prepare check console log logs
