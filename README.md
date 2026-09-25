@@ -8,7 +8,7 @@
 
 ## Description
 
-This project aims to broaden your knowledge of system administration by using Docker.
+This project aims to broaden knowledge of system administration by using Docker.
  
 ### Project Architecture
 
@@ -28,8 +28,11 @@ This project aims to broaden your knowledge of system administration by using Do
 ## Usage
 
 Once the stack is running, the following endpoints are available:
-- https://obachuri.42.fr — main WordPress admin
-- https://obachuri.42.fr/wp-admin
+- https://obachuri.42.fr - WordPress main page 
+- https://obachuri.42.fr/wp-admin - WordPress admin
+- https://obachuri.42.fr/adminer - Adminer - SQL Database management in a single PHP file
+- https://obachuri.42.fr/mysite - Simple html page
+- https://obachuri.42.fr/game - PacMan game on pygbug+pygame
 
 ## Resources
 - [Docker documentation](https://docs.docker.com/)

@@ -38,7 +38,7 @@ server {
     }
 	
 	# Adminer ----------
-    location /adminer/ {
+    location ^~ /adminer/ {
         proxy_pass http://adminer:8080/;
 
         proxy_set_header Host $host;
@@ -61,6 +61,24 @@ server {
 		fastcgi_param SERVER_PORT ${NGINX_PORT};
 		fastcgi_param HTTP_HOST ${DOMAIN_NAME}:${NGINX_PORT};
 	}
+
+	# Simple site ----------
+    location ^~ /mysite/ {
+        proxy_pass http://simple-site/;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    # PacMan ----------
+    location ^~ /game/ {
+        alias /var/www/game/;
+        index index.html;
+
+        try_files $uri $uri/ /game/index.html;
+    }
 
     location = /robots.txt {
         allow all;

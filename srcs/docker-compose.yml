@@ -10,8 +10,6 @@ x-common-service: &common-service
   networks:
     - inception-backend
 
-# SERVICES
-
 services:
   mariadb:
     <<: *common-service
@@ -110,6 +108,11 @@ services:
       - wp_files:/var/www/html
     depends_on:
       - wordpress
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep vsftpd || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   redis:
     <<: *common-service
@@ -118,6 +121,12 @@ services:
     container_name: redis
     volumes:
       - v_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s    
   
   adminer:
     <<: *common-service
@@ -134,19 +143,15 @@ services:
     ports:
       - "8080:8080"
 
-  # monitoring
-  # mariadb-exporter:
-  #   <<: *common-service
-  #   build:
-  #     context: ./requirements/mariadb-exporter
-  #     dockerfile: ./Dockerfile
-  #   image: mariadb-exporter:inception_mdb_explorer
-  #   container_name: mariadb-exporter
-  #   secrets:
-  #     - mariadb_exporter_pass
-  #   depends_on:
-  #     - mariadb
-
+  simple-site:
+    <<: *common-service
+    build:
+      context: ./requirements/simple-site
+      dockerfile: ./Dockerfile
+    container_name: simple-site
+    ports:
+      - "8880:80"
+  
   mariadb-exporter:
     <<: *common-service
     image: prom/mysqld-exporter:v0.20.0
