@@ -11,8 +11,11 @@ RUN apt-get -y update && apt-get -y upgrade && \
 
 COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 COPY tools/docker-entrypoint.sh /usr/local/bin/
+COPY tools/healthcheck.sh /usr/local/bin/
 
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/healthcheck.sh
+
 
 # RUN --mount=type=secret,id=mariadb_root_pass \
 #     --mount=type=secret,id=mariadb_admin_pass \

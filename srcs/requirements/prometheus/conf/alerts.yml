@@ -1,0 +1,11 @@
+groups:
+  - name: mariadb
+    rules:
+      - alert: MariaDBDown
+        expr: mysql_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "MariaDB is down"
+          description: "Prometheus cannot connect to MariaDB for more than 30s."

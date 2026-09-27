@@ -9,6 +9,7 @@ RUN apt-get update && \
 RUN mkdir -p /etc/prometheus  /var/lib/prometheus
 
 COPY conf/prometheus.yml /etc/prometheus/prometheus.yml
+COPY conf/alerts.yml /etc/prometheus/alerts.yml
 
 RUN chown -R prometheus:prometheus /var/lib/prometheus
 
