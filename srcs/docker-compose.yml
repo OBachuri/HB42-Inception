@@ -126,10 +126,10 @@ services:
       - DOMAIN_NAME
       - FTP_USER
     ports:
-      - "1121:21"
+      # - "1121:21"
       # - "1120:20"
-      # - "20:20"
-      # - "21:21"
+      - "20:20"
+      - "21:21"
       - "21000-21010:21000-21010"
     secrets:
       - ftp_user_pass
@@ -183,8 +183,8 @@ services:
       context: ./requirements/simple-site
       dockerfile: ./Dockerfile
     container_name: simple-site
-    ports:
-      - "8880:80"
+    # ports:
+    #   - "8880:80"
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:80/"]
       interval: 10s

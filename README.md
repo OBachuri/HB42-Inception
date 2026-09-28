@@ -156,6 +156,7 @@ Once the stack is running, the following endpoints are available:
 - https://obachuri.42.fr/adminer - Adminer - SQL Database management in a single PHP file
 - https://obachuri.42.fr/mysite - Simple html page
 - https://obachuri.42.fr/game - PacMan game on pygbug+pygame
+- http://obachuri.42.fr:9090 - Prometheus (monitoring)
 
 ## Security Note About Docker Volumes
 - If you have access to run docker and to read files/folders - you could change or delete this files/folders. Rootless Docker solves this problem, but not completely.
@@ -192,4 +193,6 @@ AI was used to conceptual understanding and to structuring this README to meet s
 
 ## License
 
-Part of the 42 curriculum project.
+This project was created as part of the 42 curriculum.
+
+It is intended for educational purposes.
