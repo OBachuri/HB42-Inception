@@ -2,6 +2,9 @@
 
 # start chromium with static DNS record for my site
 
+# -- Create link if necessary
+# sudo ln -s /usr/bin/chromium /usr/local/bin/chromium-browser
+
 # Enable automatically exporting all defined variables
 set -a ; \
 source srcs/.env ; \

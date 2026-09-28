@@ -58,8 +58,9 @@ server {
 		fastcgi_param HTTPS on;
 		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
 		include fastcgi_params;
-		fastcgi_param SERVER_PORT ${NGINX_PORT};
-		fastcgi_param HTTP_HOST ${DOMAIN_NAME}:${NGINX_PORT};
+    #  --- need if NGINX_PORT <> 443
+	#	fastcgi_param SERVER_PORT ${NGINX_PORT};
+	#	fastcgi_param HTTP_HOST ${DOMAIN_NAME}:${NGINX_PORT};
 	}
 
 	# Simple site ----------
