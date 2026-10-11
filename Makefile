@@ -141,4 +141,4 @@ check:
 
 	@echo "All required files are present."
 
-.PHONY: install run debug clean fclean help info prepare check console log logs
+.PHONY: install run clean fclean help info prepare check console log logs
